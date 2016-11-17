@@ -23,6 +23,7 @@ static int installSuccess = 0;
 static int installToUsb = 0;
 static u32 installError = 0;
 static u64 installedTitle = 0;
+static u64 baseTitleId = 0;
 static int dirNum = 0;
 static char installFolder[256] = "";
 static char errorText1[128] = "";
@@ -341,11 +342,15 @@ int Menu_Main(void)
 
     OSScreenEnableEx(0, 1);
     OSScreenEnableEx(1, 1);
+	
+    u64 currenTitleId = OSGetTitleID();
+    int hblChannelLaunch = (currenTitleId == 0x0005000013374842);
 
     // in case we are not in mii maker but in system menu we start the installation
-    if (OSGetTitleID() != 0x000500101004A200 && // mii maker eur
-        OSGetTitleID() != 0x000500101004A100 && // mii maker usa
-        OSGetTitleID() != 0x000500101004A000)   // mii maker jpn
+    if (currenTitleId != 0x000500101004A200 && // mii maker eur
+        currenTitleId != 0x000500101004A100 && // mii maker usa
+        currenTitleId != 0x000500101004A000 && // mii maker jpn
+        !hblChannelLaunch)                     // HBL channel
     {
 		char folder[256];
 		__os_snprintf(folder, sizeof(folder), "/vol/app_sd/%s", installFolder);
@@ -353,7 +358,7 @@ int Menu_Main(void)
 
         MEM1_free(screenBuffer);
         memoryRelease();
-        SYSLaunchMiiStudio(0);
+        SYSLaunchTitle(baseTitleId);
 
         return EXIT_RELAUNCH_ON_LOAD;
     }
